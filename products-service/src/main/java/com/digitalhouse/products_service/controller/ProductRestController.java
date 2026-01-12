@@ -1,27 +1,30 @@
 package com.digitalhouse.products_service.controller;
 
 import com.digitalhouse.products_service.entity.Product;
+import jakarta.ws.rs.DefaultValue;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/products")
 public class ProductRestController {
 
     @GetMapping
-    public ResponseEntity<?> getProduct(
+    public Product getProduct(
             @RequestParam String id,
-            @RequestHeader(value = "X-Request-from", required = false) String requestFrom
+            @RequestParam(required = false, defaultValue = "false") Boolean throwError
     ) {
 
-        if (requestFrom == null || !requestFrom.equals("gateway")) {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body("Access denied: only gateway is allowed");
+        if (throwError) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Simulated error"
+            );
         }
 
-        Product product = new Product(id, "Notebook", 2000.0);
-        return ResponseEntity.ok(product);
+        return new Product(id, "Product " + id, 100.0);
     }
+
 }
